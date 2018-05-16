@@ -50,35 +50,40 @@ for j in range(0, len(files_list)):
     # iterating through the column of data
     for k in range(0, numcols):
 
-        print(my_Data[0,k])
-
-        if "Axial" in my_Data[0,k]:
+        if "Axial" in my_Data[0][k]:
             for w in range(2, numrows):
-                Axial.append(my_Data[w,k])
+                Axial.append(my_Data[w][k])
 
         run_avg = []    # holder for running average
         run_sum = 0     # re-zeroing the running sum for averaging.
 
-        if "Load" in my_Data[0,k]:
+        if "Load" in my_Data[0][k]:
+            # checking to see if the column of data is on the valley side.
+            # if on the peak side, then skipping. 
+            if float(my_Data[50][k]) < -0.5:
+                continue
+            
             for w in range(2, numrows):
 
                 if w < N:
-                    run_sum += my_Data[w,k]
+                    run_sum += float(my_Data[w][k])
 
-                if w >= N:
+                if w > N+5:
                     run_avg = run_sum / N
 
                     # Fracture detection, if the current read values is
                     # greater than the running average, the write the location
                     # into the text file.
-                    if  my_Data[w,k] > change * run_avg:
+                    if  float(my_Data[w][k]) > change * run_avg:
                         cheese.write("Fracture found at " +
-                                     Axial[w] +
+                                     Axial[w-2] +
                                      " cycles, for " +
-                                     my_Data[0,k] +'\n')
+                                     my_Data[0][k] +
+                                     "at force reading " +
+                                     my_Data[w][k] + '\n')
 
                     # Updating the running sum.
-                    run_sum += my_Data[w,k] - my_Data[w-N,k]
+                    run_sum += float(my_Data[w][k]) - float(my_Data[w-N][k])
 
     # Writes a dividing line between files being read. 
     cheese.write("~~~~ ---- ~~~~ ---- ~~~~~ ---- ~~~~ ---- ~~~~" +
